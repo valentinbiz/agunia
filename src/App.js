@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from "react-router-dom";
 
-function App() {
+import { useEffect } from "react";
+
+import { useDispatch } from "react-redux/es/exports";
+
+import { onAuthStateChangedListener, createUserDoc } from "./Utils/Firebase/Firebase.Utils";
+import { setCurrentUser } from "./Store/User/UserAction";
+
+import Home from "./Routes/Home/Home.Component";
+import Navigation from "./Routes/Navigation/Navigation.Component";
+import Authentication from "./Routes/Authentication/Authentication.Component";
+import Shop from "./Routes/Shop/Shop.Component";
+import CheckoutPage from "./Routes/Checkout/Checkout.Component";
+
+const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChangedListener((user) => {
+        if(user) {
+            createUserDoc(user);
+        }
+        dispatch(setCurrentUser(user));
+    });
+
+    return unsubscribe;
+}, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/" element={<Navigation />}>
+        <Route index element={<Home />} />
+        <Route path="shop/*" element={<Shop />} />
+        <Route path="auth" element={<Authentication />} />
+        <Route path="checkout" element={<CheckoutPage />} />
+      </Route>
+    </Routes>
   );
-}
+};
 
 export default App;
